@@ -30,6 +30,8 @@ import { TaskFilterDialogCloudComponent } from './task-filter-dialog-cloud.compo
 import { TranslationService, UserPreferencesService, UserPreferenceValues } from '@alfresco/adf-core';
 import { AppsProcessCloudService } from '../../../app/services/apps-process-cloud.service';
 import { ApplicationInstanceModel } from '../../../app/models/application-instance.model';
+import { TaskCloudService } from '../../services/task-cloud.service';
+import { ProcessDefinitionCloud } from 'process-services-cloud/src/lib/process/public-api';
 
 @Component({
     selector: 'adf-cloud-edit-task-filter',
@@ -43,6 +45,7 @@ export class EditTaskFilterCloudComponent implements OnInit, OnChanges, OnDestro
     public static ACTION_DELETE = 'delete';
     public static APP_RUNNING_STATUS: string = 'RUNNING';
     public static APPLICATION_NAME: string = 'appName';
+    public static PROCESS_DEFINITION_NAME: string = 'processDefinitionName';
     public static LAST_MODIFIED: string = 'lastModified';
     public static SORT: string = 'sort';
     public static ORDER: string = 'order';
@@ -109,6 +112,7 @@ export class EditTaskFilterCloudComponent implements OnInit, OnChanges, OnDestro
     ];
 
     private applicationNames: any[] = [];
+    private processDefinitionNames: any[] = [];
     private formHasBeenChanged = false;
     editTaskFilterForm: FormGroup;
     taskFilterProperties: TaskFilterProperties[] = [];
@@ -125,7 +129,8 @@ export class EditTaskFilterCloudComponent implements OnInit, OnChanges, OnDestro
         private taskFilterCloudService: TaskFilterCloudService,
         private dateAdapter: DateAdapter<Moment>,
         private userPreferencesService: UserPreferencesService,
-        private appsProcessCloudService: AppsProcessCloudService) {
+        private appsProcessCloudService: AppsProcessCloudService,
+        private taskCloudService: TaskCloudService) {
     }
 
     ngOnInit() {
@@ -211,9 +216,13 @@ export class EditTaskFilterCloudComponent implements OnInit, OnChanges, OnDestro
     createAndFilterProperties() {
         this.checkMandatoryFilterProperties();
 
-        if (this.checkForApplicationNameProperty()) {
+        if (this.checkForProperty(EditTaskFilterCloudComponent.APPLICATION_NAME)) {
             this.applicationNames = [];
             this.getRunningApplications();
+        }
+        if (this.checkForProperty(EditTaskFilterCloudComponent.PROCESS_DEFINITION_NAME)) {
+            this.processDefinitionNames = [];
+            this.getProcessDefinitions();
         }
 
         const defaultProperties = this.createTaskFilterProperties(this.taskFilter);
@@ -239,8 +248,8 @@ export class EditTaskFilterCloudComponent implements OnInit, OnChanges, OnDestro
         return filterProperties ? filterProperties.indexOf(filterProperty.key) >= 0 : true;
     }
 
-    checkForApplicationNameProperty(): boolean {
-        return this.filterProperties ? this.filterProperties.indexOf(EditTaskFilterCloudComponent.APPLICATION_NAME) >= 0 : false;
+    checkForProperty(property: string): boolean {
+        return this.filterProperties ? this.filterProperties.indexOf(property) >= 0 : false;
     }
 
     hasSortProperty(): boolean {
@@ -332,6 +341,18 @@ export class EditTaskFilterCloudComponent implements OnInit, OnChanges, OnDestro
                     });
                 }
             });
+    }
+
+    getProcessDefinitions() {
+        this.taskCloudService.getProcessDefinitions(this.appName)
+        .pipe(takeUntil(this.onDestroy$))
+        .subscribe((processDefinitions: ProcessDefinitionCloud[]) => {
+            if (processDefinitions && processDefinitions.length > 0) {
+                processDefinitions.map((processDefinition) => {
+                    this.processDefinitionNames.push({ label: processDefinition.name, value: processDefinition.name });
+                });
+            }
+        });
     }
 
     executeFilterActions(action: TaskFilterAction): void {
@@ -526,6 +547,13 @@ export class EditTaskFilterCloudComponent implements OnInit, OnChanges, OnDestro
                 type: 'text',
                 key: 'assignee',
                 value: currentTaskFilter.assignee || ''
+            }),
+            new TaskFilterProperties({
+                label: 'ADF_CLOUD_EDIT_TASK_FILTER.LABEL.PROCESS_DEF_NAME',
+                type: 'select',
+                key: 'processDefinitionName',
+                value: currentTaskFilter.processDefinitionName || '',
+                options: this.processDefinitionNames
             }),
             new TaskFilterProperties({
                 label: 'ADF_CLOUD_EDIT_TASK_FILTER.LABEL.PROCESS_INSTANCE_ID',
