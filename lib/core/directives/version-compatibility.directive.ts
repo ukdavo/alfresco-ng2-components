@@ -57,7 +57,7 @@ export class VersionCompatibilityDirective {
         } as VersionModel;
     }
 
-    private isVersionSupported(requiredVersion: string): boolean {
+    isVersionSupported(requiredVersion: string): boolean {
         const parsedRequiredVersion = this.parseVersion(requiredVersion);
         const currentVersion = this.versionCompatibilityService.getAcsVersion();
 
