@@ -439,6 +439,10 @@ export class EditTaskFilterCloudComponent implements OnInit, OnChanges, OnDestro
         return property.type === 'date';
     }
 
+    isDateRangeType(property: TaskFilterProperties): boolean {
+        return property.type === 'date-range';
+    }
+
     isSelectType(property: TaskFilterProperties): boolean {
         return property.type === 'select';
     }
@@ -585,12 +589,6 @@ export class EditTaskFilterCloudComponent implements OnInit, OnChanges, OnDestro
                 value: ''
             }),
             new TaskFilterProperties({
-                label: 'ADF_CLOUD_EDIT_TASK_FILTER.LABEL.DUE_DATE',
-                type: 'date',
-                key: 'dueDate',
-                value: ''
-            }),
-            new TaskFilterProperties({
                 label: 'ADF_CLOUD_EDIT_TASK_FILTER.LABEL.SORT',
                 type: 'select',
                 key: 'sort',
@@ -609,6 +607,12 @@ export class EditTaskFilterCloudComponent implements OnInit, OnChanges, OnDestro
                 type: 'checkbox',
                 key: 'standalone',
                 value: currentTaskFilter.standalone || false
+            }),
+            new TaskFilterProperties({
+                label: 'ADF_CLOUD_EDIT_TASK_FILTER.LABEL.DUE_DATE',
+                type: 'date-range',
+                key: 'dueDate',
+                value: currentTaskFilter.dueDate || false
             })
         ];
     }
