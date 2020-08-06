@@ -257,6 +257,9 @@ export class DocumentListComponent implements OnInit, OnChanges, OnDestroy, Afte
 
     _currentFolderId: string = null;
 
+    @Input()
+    preSelectedNodes: any[] = [];
+
     /** The ID of the folder node to display or a reserved string alias for special sources */
     @Input()
     set currentFolderId(currentFolderId: string) {
@@ -267,7 +270,7 @@ export class DocumentListComponent implements OnInit, OnChanges, OnDestroy, Afte
                 this.orderBy = this.buildOrderByArray(key, direction);
             }
             if (this.data) {
-                this.data.loadPage(null, false);
+                this.data.loadPage(null, false, null, this.preSelectedNodes);
                 this.resetNewFolderPagination();
             }
 
@@ -492,7 +495,7 @@ export class DocumentListComponent implements OnInit, OnChanges, OnDestroy, Afte
         if (this.data) {
             if (changes.node && changes.node.currentValue) {
                 const merge = this._pagination ? this._pagination.merge : false;
-                this.data.loadPage(changes.node.currentValue, merge);
+                this.data.loadPage(changes.node.currentValue, merge, null, this.preSelectedNodes);
                 this.onDataReady(changes.node.currentValue);
             } else if (changes.imageResolver) {
                 this.data.setImageResolver(changes.imageResolver.currentValue);
@@ -504,7 +507,7 @@ export class DocumentListComponent implements OnInit, OnChanges, OnDestroy, Afte
         this.ngZone.run(() => {
             this.resetSelection();
             if (this.node) {
-                this.data.loadPage(this.node, this._pagination.merge);
+                this.data.loadPage(this.node, this._pagination.merge, null, this.preSelectedNodes);
                 this.onDataReady(this.node);
             } else {
                 this.loadFolder();
@@ -695,7 +698,7 @@ export class DocumentListComponent implements OnInit, OnChanges, OnDestroy, Afte
 
     onPageLoaded(nodePaging: NodePaging) {
         if (nodePaging) {
-            this.data.loadPage(nodePaging, this._pagination.merge, this.allowDropFiles);
+            this.data.loadPage(nodePaging, this._pagination.merge, this.allowDropFiles, this.preSelectedNodes);
             this.setLoadingState(false);
             this.onDataReady(nodePaging);
         }
